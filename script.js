@@ -121,16 +121,21 @@ function createGameGrid() {
       grid[90].style.backgroundColor = currentPlayer === 1 ? "green" : "red";
       playerPositions[currentIndex] = 1;
     } else if (playerPositions[currentIndex] > 0) {
-      // Move player based on dice value
-      const newPosition = Math.min(
-        playerPositions[currentIndex] + diceValue,
-        100
-      );
-      grid[100 - playerPositions[currentIndex]].style.backgroundColor = ""; // Clear previous position
-      playerPositions[currentIndex] = newPosition;
-      grid[100 - newPosition].style.backgroundColor =
-        currentPlayer === 1 ? "green" : "red";
-    }
+
+          const newPosition =playerPositions[currentIndex] + diceValue
+          playerPositions[currentIndex] = newPosition;
+          if( 90 + playerPositions[currentIndex]  < 100){
+            grid[90 + playerPositions[currentIndex] - 1].style.backgroundColor = currentPlayer === 1 ?"green":"red";
+          }else{
+              grid[100 - playerPositions[currentIndex]].style.backgroundColor = currentPlayer === 1 ?"green":"red"; 
+              
+          }
+         
+      }
+      
+      
+      
+    
 
     // Change turn
     if (diceValue !== 1 && diceValue !== 6) {
