@@ -101,7 +101,7 @@ function createGameGrid() {
 
   createGameGrid();
 
-  // Load player names
+  
   const player1Name = localStorage.getItem("player1") || "Player 1";
   const player2Name = localStorage.getItem("player2") || "Player 2";
 
@@ -111,42 +111,100 @@ function createGameGrid() {
   let currentPlayer = 1; // 1 for player1, 2 for player2
   let playerPositions = [0, 0]; // Positions for player 1 and 2
 
-  rollTheDice.addEventListener("click", function () {
-    const diceValue = Math.floor(Math.random() * 6) + 1;
-    rollResult.textContent = diceValue;
+  // Define snakes and ladders
+const snakesAndLadders = {
+  14: 4,  // Snake: 14 -> 4
+ 
 
-    const currentIndex = currentPlayer - 1;
-    if (playerPositions[currentIndex] === 0 && diceValue === 1) {
-      // Start player on the grid
-      grid[90].style.backgroundColor = currentPlayer === 1 ? "green" : "red";
-      playerPositions[currentIndex] = 1;
-    } else if (playerPositions[currentIndex] > 0) {
+  91: 81  // Ladder: 80 -> 99
+};
 
-          const newPosition =playerPositions[currentIndex] + diceValue
-          playerPositions[currentIndex] = newPosition;
-          if( 90 + playerPositions[currentIndex]  < 100){
-            grid[90 + playerPositions[currentIndex] - 1].style.backgroundColor = currentPlayer === 1 ?"green":"red";
-          }else{
-              grid[100 - playerPositions[currentIndex]].style.backgroundColor = currentPlayer === 1 ?"green":"red"; 
-              
-          }
-         
-      }
-      
-      
-      
-    
+rollTheDice.addEventListener("click", function () {
+  const diceValue = Math.floor(Math.random() * 6) + 1;
+  rollResult.textContent = diceValue;
 
-    // Change turn
-    if (diceValue !== 1 && diceValue !== 6) {
-      currentPlayer = currentPlayer === 1 ? 2 : 1;
+  const currentIndex = currentPlayer - 1; // Current player index (0 or 1)
+  const opponentIndex = currentPlayer === 1 ? 1 : 0; // Opponent player index
+  const previousValue = playerPositions[currentIndex]; // Previous position of the current player
+
+  if (playerPositions[currentIndex] === 0 && diceValue === 1) {
+    // Start player on the grid
+    grid[90].style.backgroundColor = currentPlayer === 1 ? "green" : "red";
+    playerPositions[currentIndex] = 1;
+  } else if (playerPositions[currentIndex] > 0) {
+    // Update position
+    let newPosition = playerPositions[currentIndex] + diceValue;
+
+    if (newPosition > 100) {
+      newPosition = 100; // Ensure the player does not exceed the board
     }
 
-    const playerTurnResult = document.getElementById("playerTurnResult");
-    playerTurnResult.textContent = player1 + "turn !!"
+    // Check for snakes or ladders
+    if (snakesAndLadders[newPosition]) {
+      const oldPosition = newPosition;
+      newPosition = snakesAndLadders[newPosition];
+      alert(
+        `Player ${
+          currentPlayer === 1 ? player1Name : player2Name
+        } hit a ${oldPosition > newPosition ? "snake" : "ladder"}! Moved to ${newPosition}.`
+      );
+    }
 
-    playerTurnResult.textContent = `${currentPlayer === 1 ? player1Name : player2Name} turn !!`
-  });
+    // Update grid visually
+    if (newPosition <= 100) {
+      const gridIndex = newPosition - 1;
+      const prevGridIndex = previousValue - 1;
+
+      // Clear old position
+      if (previousValue > 0) {
+        grid[prevGridIndex].style.backgroundColor = "";
+      }
+
+      // Set new position
+      grid[gridIndex].style.backgroundColor =
+        currentPlayer === 1 ? "green" : "red";
+    }
+
+    playerPositions[currentIndex] = newPosition;
+
+    // Check if the player "eats" the opponent
+    if (playerPositions[currentIndex] === playerPositions[opponentIndex]) {
+      alert(
+        `${currentPlayer === 1 ? player1Name : player2Name} ate ${
+          currentPlayer === 1 ? player2Name : player1Name
+        }!`
+      );
+
+      // Reset the opponent's position
+      const opponentPreviousPosition = playerPositions[opponentIndex];
+      playerPositions[opponentIndex] = 0;
+
+      // Clear the opponent's position on the grid
+      if (opponentPreviousPosition > 0) {
+        grid[opponentPreviousPosition - 1].style.backgroundColor = "";
+      }
+    }
+  }
+
+  // Change turn
+  if (diceValue !== 1 && diceValue !== 6) {
+    currentPlayer = currentPlayer === 1 ? 2 : 1;
+  }
+
+  // Update turn display
+  const playerTurnResult = document.getElementById("playerTurnResult");
+  playerTurnResult.textContent = `${
+    currentPlayer === 1 ? player1Name : player2Name
+  } turn !!`;
+
+  // Check for win
+  if (playerPositions[currentIndex] === 100) {
+    alert(`${currentPlayer === 1 ? player1Name : player2Name} wins the game!`);
+    // Reset the game or take other actions
+  }
+});
+
+  
 });
 
 
